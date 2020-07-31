@@ -2,6 +2,7 @@ import { inject, injectable } from 'tsyringe';
 
 import IProductsRepository from '@modules/products/repositories/IProductsRepository';
 import ICustomersRepository from '@modules/customers/repositories/ICustomersRepository';
+import AppError from '@shared/errors/AppError';
 import Order from '../infra/typeorm/entities/Order';
 import IOrdersRepository from '../repositories/IOrdersRepository';
 
@@ -12,13 +13,26 @@ interface IRequest {
 @injectable()
 class FindOrderService {
   constructor(
+    @inject('OrdersRepository')
     private ordersRepository: IOrdersRepository,
+
+    @inject('ProductsRepository')
     private productsRepository: IProductsRepository,
+
+    @inject('CustomersRepository')
     private customersRepository: ICustomersRepository,
   ) {}
 
   public async execute({ id }: IRequest): Promise<Order | undefined> {
-    // TODO
+    // procurando a ordem...
+    const order = await this.ordersRepository.findById(id);
+
+    // verificandos e a ordem foi encontrada...
+    if (!order) {
+      throw new AppError('Order not found');
+    }
+
+    return order;
   }
 }
 
